@@ -3,6 +3,7 @@
 # App (Project) Name
 name = "car-geo"
 
+
 # Dioxus App Default Platform
 # web, desktop, fullstack
 default_platform = "web"
@@ -17,6 +18,9 @@ asset_dir = "assets"
 
 # HTML title tag content
 title = "car-geo"
+
+# required for GH pages
+base_path = "car-geo"
 
 [web.watcher]
 
