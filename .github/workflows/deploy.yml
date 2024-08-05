@@ -3,6 +3,9 @@ name: github pages
 permissions:
   contents: write
 
+inputs:
+  rootPath: "car-geo""
+
 on:
   push:
     branches:
