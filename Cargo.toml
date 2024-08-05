@@ -1,0 +1,15 @@
+[package]
+name = "car-geo"
+version = "0.1.0"
+authors = ["Charles-Henri Mousset <ch.mousset@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+dioxus = { version = "0.5", features = ["web"] }
+dioxus_bulma = { version = "0.1.1", git = "https://github.com/chmousset/rs-dioxus-bulma.git" }
+
+# Debug
+dioxus-logger = "0.5.1"
