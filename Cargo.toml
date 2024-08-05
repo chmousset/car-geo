@@ -13,3 +13,12 @@ dioxus_bulma = { version = "0.1.1", git = "https://github.com/chmousset/rs-dioxu
 
 # Debug
 dioxus-logger = "0.5.1"
+
+[profile.release]
+opt-level = "z"
+debug = false
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+incremental = false
