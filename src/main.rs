@@ -4,6 +4,8 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 use std::f64::consts::PI;
 use std::str::FromStr;
+use web_sys;
+use web_sys::wasm_bindgen::JsCast;
 
 use dioxus_bulma::components::containers::{Box, Container, Content, Footer, Section};
 use dioxus_bulma::components::form::*;
@@ -26,19 +28,31 @@ pub fn VarMmInput(
     expanded: Option<bool>,
     value: Signal<f64>,
     placeholder: Option<String>,
+    align_right: Option<bool>,
     addon_left: Element,
     addon_right: Element,
 ) -> Element {
+    let right = align_right.or(Some(false)).unwrap();
     let mut invalid = use_signal(|| false);
     let oninput = move |event: Event<FormData>| {
         if let Ok(parsed_value) = f64::from_str(&event.value()) {
             let mut value_clone = value.clone();
             value_clone.set(parsed_value);
             *invalid.write() = false;
+            event.stop_propagation();
         } else {
             *invalid.write() = true;
         }
-        event.stop_propagation();
+    };
+
+    let onfocus = move |evt: Event<FocusData>| {
+        evt.downcast::<web_sys::FocusEvent>()
+            .unwrap()
+            .target()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlInputElement>()
+            .unwrap()
+            .select()
     };
 
     rsx! (
@@ -52,12 +66,15 @@ pub fn VarMmInput(
             horizontal,
             expanded,
             input {
+                r#type: "number",
                 oninput,
+                onfocus,
                 class: "input",
                 class: if invalid() {"is-danger"},
+                class: if right {"has-text-right"},
                 "type": "number",
                 placeholder,
-                value: value,
+                value: if !invalid() {value},
             }
         }
     )
@@ -174,6 +191,13 @@ fn App() -> Element {
                             addon_right: None,
                         }
                         VarMmInput {
+                                label: "Wheel Diameter",
+                                horizontal: true,
+                                value: Wd,
+                                addon_left: None,
+                                addon_right: None,
+                            }
+                        VarMmInput {
                             label: "Front Overhang",
                             horizontal: true,
                             value: Fo,
@@ -226,11 +250,13 @@ fn App() -> Element {
                                     "Toe Left: {Tfl().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
+                                    class: "has-text-right",
                                     "Toe Right: {Tfr().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
                                     VarMmInput {
                                         value: Wffr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -240,9 +266,13 @@ fn App() -> Element {
                                 td {"{Wfl().or(Some(0.0)).unwrap():.2}"}
                                 td {
                                     colspan: 2,
+                                    class: "has-text-centered",
                                     "Front Width: {Fw().or(Some(0.0)).unwrap():.2}"
                                 }
-                                td {"{Wfr().or(Some(0.0)).unwrap():.2}"}
+                                td {
+                                    class: "has-text-right",
+                                    "{Wfr().or(Some(0.0)).unwrap():.2}"
+                                }
                             }
                             tr {
 
@@ -255,11 +285,13 @@ fn App() -> Element {
                                 }
                                 td {
                                     colspan: 2,
+                                    class: "has-text-centered",
                                     "Total Toe: {Tfl().or(Some(0.0)).unwrap() + Tfr().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
                                     VarMmInput {
                                         value: Wfbr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -268,6 +300,7 @@ fn App() -> Element {
                             tr {
                                 td {
                                     colspan: 4,
+                                    class: "has-text-centered",
                                     "Car angle: {Ca().or(Some(0.0)).unwrap():.2}°"
                                 }
                             }
@@ -284,11 +317,13 @@ fn App() -> Element {
                                     "Toe Left: {Tbl().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
+                                    class: "has-text-right",
                                     "Toe Right: {Tbr().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
                                     VarMmInput {
                                         value: Wbfr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -298,9 +333,13 @@ fn App() -> Element {
                                 td {"{Wbl().or(Some(0.0)).unwrap():.2}"}
                                 td {
                                     colspan: 2,
+                                    class: "has-text-centered",
                                     "Width: {Rw().or(Some(0.0)).unwrap():.2}"
                                 }
-                                td {"{Wbr().or(Some(0.0)).unwrap():.2}"}
+                                td {
+                                    class: "has-text-right",
+                                    "{Wbr().or(Some(0.0)).unwrap():.2}"
+                                }
                             }
                             tr {
                                 td {
@@ -312,11 +351,13 @@ fn App() -> Element {
                                 }
                                 td {
                                     colspan: 2,
+                                    class: "has-text-centered",
                                     "Total Toe: {Tbl().or(Some(0.0)).unwrap() + Tbr().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
                                     VarMmInput {
                                         value: Wbbr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -332,7 +373,7 @@ fn App() -> Element {
                         thead {
                             th {
                                 colspan: 4,
-                                text_align: "center",
+                                class: "has-text-centered",
                                 "Enter distance to laser, Top to Bottom"
                             }
                         }
@@ -349,11 +390,13 @@ fn App() -> Element {
                                     "camber Left: {Cfl().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
+                                    class: "has-text-right",
                                     "Camber Right: {Cfr().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
                                     VarMmInput {
                                         value: Hftr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -374,6 +417,7 @@ fn App() -> Element {
                                 td {
                                     VarMmInput {
                                         value: Hfbr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -398,11 +442,13 @@ fn App() -> Element {
                                     "Camber Left: {Cbl().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
+                                    class: "has-text-right",
                                     "Camber Right: {Cbr().or(Some(0.0)).unwrap():.2}°"
                                 }
                                 td {
                                     VarMmInput {
                                         value: Hbtr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -423,6 +469,7 @@ fn App() -> Element {
                                 td {
                                     VarMmInput {
                                         value: Hbbr,
+                                        align_right: true,
                                         addon_left: None,
                                         addon_right: None,
                                     }
@@ -437,7 +484,11 @@ fn App() -> Element {
             div {
                 class: "has-text-centered",
                 p {
-                    "Simple Car Geometry 0.1"
+                    "Simple Car Geometry 0.1 "
+                    a {
+                        href: "https://github.com/chmousset/car-geo",
+                        "github.com/chmousset/car-geo"
+                    }
                 }
                 p {
                     "Copyright 2024 Charles-Henri Mousset"
